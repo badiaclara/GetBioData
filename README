@@ -1,0 +1,64 @@
+GetBioData 🌿
+
+GetBioData é um pacote em R desenvolvido para automatizar a captura, padronização e limpeza de dados de ocorrência de espécies a partir das bases GBIF e speciesLink.
+
+O pacote resolve o problema comum de lidar com centenas de colunas desnecessárias e registros duplicados entre diferentes plataformas, entregando um conjunto de dados enxuto e pronto para análise.
+🚀 Funcionalidades
+
+    Download Simétrico: Captura dados do GBIF e speciesLink com nomes de colunas harmonizados.
+
+    Seleção Essencial: Filtra automaticamente as 16 colunas fundamentais para biogeografia (Taxonomia, Coordenadas, Coletor, Data e Determinação).
+
+    Deduplicação Hierárquica: Identifica duplicatas comparando IDs de catálogo, IDs de ocorrência, eventos de coleta e proximidade espacial.
+
+    Auditoria Total: Gera arquivos LABEL (para conferência e identificação das duplicatas) e KILL (dados finais limpos, com duplicatas removidas).
+
+📦 Instalação
+R
+
+# Instale via devtools
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("seu-usuario/GetBioData")
+
+🛠️ Como usar
+
+O workflow principal consolida todo o processo em um único comando:
+R
+
+library(GetBioData)
+
+# 1. Configure sua chave do speciesLink (opcional)
+Sys.setenv(SPLINK_API_KEY = "sua_chave_aqui")     ----> Importante: o usuário deve cadastrar-se no site do splink e gerar sua chave API, pessoal e intransferível. A análise não vai rodar sem a chave.
+
+# 2. Defina as espécies
+spp <- c("Araucaria angustifolia", "Cedrela fissilis")
+
+# 3. Execute o workflow
+# Isso gerará dois arquivos .xlsx para cada espécie na sua pasta de trabalho
+resultados <- run_workflow(species = spp)
+
+📂 Entendendo os Resultados
+
+Para cada espécie, o GetBioData exporta:
+
+    GetBioData_Dedup_LABELED_especie.xlsx: Contém todos os dados originais + colunas DUP_GROUP e DUP_CRITERIA. Use este arquivo para auditar por que um registro foi considerado duplicata.
+
+    GetBioData_Dedup_KILLED_especie.xlsx: Arquivo final contendo apenas os registros únicos. Ideal para Modelagem de Distribuição de Espécies (SDM).
+
+📊 Colunas Padronizadas (Standard 16)
+
+O pacote reduz a complexidade das bases originais para este conjunto essencial:
+
+Categoria	Colunas
+
+Taxonomia	ESPÉCIE, FAMÍLIA, GÊNERO
+Espaço		LATITUDE, LONGITUDE, PAÍS, ESTADO, MUNICÍPIO
+Coleta		COLETOR, DATA_COLETA
+Curadoria	DETERMINADOR, DATA_DETERMINACAO
+Registros	CATÁLOGO, INSTITUIÇÃO, OCCURRENCE_ID, FONTE
+
+📄 Licença
+
+Este projeto está sob a licença MIT.
+
+Divirta-se :)
