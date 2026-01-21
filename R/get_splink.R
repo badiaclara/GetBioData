@@ -5,52 +5,57 @@
 #' @return Tibble of occurrence records standardized to 16 columns.
 #' @export
 get_splink <- function(species, api_key = Sys.getenv("SPLINK_API_KEY")) {
-  if (api_key == "") return(dplyr::tibble())
+  if (api_key == "") {
+    stop("\n[GetBioData] ERRO: Chave speciesLink não encontrada!\n",
+         "1. Pegue sua chave em: https://api.splink.org.br/\n",
+         "2. Use: Sys.setenv(SPLINK_API_KEY = 'SUA_CHAVE')", call. = FALSE)
+  }
 
-  results <- lapply(species, function(spp) {
-    cat("Downloading speciesLink data for:", spp, "...\n")
-    url <- paste0("https://specieslink.net/ws/1.0/search?scientificname=",
-                  utils::URLencode(spp), "&apikey=", api_key, "&limit=100000")
+  message(paste0("-> Consultando speciesLink para: ", species, "..."))
+  base_url <- "https://api.splink.org.br/records/format/json/"
+  full_url <- paste0(base_url, "scientificname/", gsub(" ", "%20", species), "/apikey/", api_key)
 
-    resp <- tryCatch(httr::GET(url, httr::timeout(60)), error = function(e) NULL)
-    if (is.null(resp) || httr::status_code(resp) != 200) return(dplyr::tibble())
+  tryCatch({
+    res <- httr::GET(full_url, httr::timeout(30))
+    if (httr::status_code(res) == 401) stop("Chave API inválida.")
 
-    data <- jsonlite::fromJSON(httr::content(resp, "text", encoding = "UTF-8"))
-    if (is.null(data$features) || length(data$features) == 0) return(dplyr::tibble())
+    cont <- httr::content(res, as = "text", encoding = "UTF-8")
+    data <- jsonlite::fromJSON(cont, flatten = TRUE)
 
-    df_props <- as.data.frame(data$features$properties)
-    df_geom  <- as.data.frame(data$features$geometry)
+    if (is.null(data$records) || length(data$records) == 0) {
+      message("   (!) Nenhum registro no speciesLink.")
+      return(data.frame())
+    }
 
-    names(df_props) <- lower_names <- tolower(names(df_props))
-
-    df_props$long_clean <- sapply(df_geom$coordinates, function(x) if(length(x) >= 1) as.numeric(x[1]) else NA)
-    df_props$lat_clean  <- sapply(df_geom$coordinates, function(x) if(length(x) >= 2) as.numeric(x[2]) else NA)
-
-    df_props |>
+    df <- data$records
+    # Padronização das 16 colunas
+    df_clean <- df %>%
       dplyr::mutate(
-        ESPÉCIE = if("scientificname" %in% lower_names) scientificname else spp,
-        FAMÍLIA = if("family" %in% lower_names) family else NA_character_,
-        GÊNERO  = if("genus" %in% lower_names) genus else NA_character_,
-        LATITUDE = lat_clean, LONGITUDE = long_clean,
-        COLETOR = if("recordedby" %in% lower_names) recordedby else NA_character_,
-        DATA_COLETA = paste0(
-          if("yearcollected" %in% lower_names) yearcollected else "", "-",
-          if("monthcollected" %in% lower_names) monthcollected else "", "-",
-          if("daycollected" %in% lower_names) daycollected else ""
-        ),
-        PAÍS = if("country" %in% lower_names) country else NA_character_,
-        ESTADO = if("stateprovince" %in% lower_names) stateprovince else NA_character_,
-        MUNICÍPIO = if("county" %in% lower_names) county else NA_character_,
-        DETERMINADOR = if("identifiedby" %in% lower_names) identifiedby else NA_character_,
-        DATA_DETERMINACAO = if("yearidentified" %in% lower_names) as.character(yearidentified) else NA_character_,
-        CATÁLOGO = if("catalognumber" %in% lower_names) as.character(catalognumber) else NA_character_,
-        INSTITUIÇÃO = if("institutioncode" %in% lower_names) institutioncode else NA_character_,
-        OCCURRENCE_ID = if("occurrenceid" %in% lower_names) as.character(occurrenceid) else CATÁLOGO,
-        FONTE = "SPLink"
-      ) |>
-      dplyr::select(ESPÉCIE, FAMÍLIA, GÊNERO, LATITUDE, LONGITUDE, COLETOR,
-                    DATA_COLETA, PAÍS, ESTADO, MUNICÍPIO, DETERMINADOR,
-                    DATA_DETERMINACAO, CATÁLOGO, INSTITUIÇÃO, OCCURRENCE_ID, FONTE)
+        ESPÉCIE = as.character(scientificName),
+        FAMÍLIA = if("family" %in% names(.)) as.character(family) else NA,
+        GÊNERO = if("genus" %in% names(.)) as.character(genus) else NA,
+        LATITUDE = as.numeric(decimalLatitude),
+        LONGITUDE = as.numeric(decimalLongitude),
+        PAÍS = if("country" %in% names(.)) as.character(country) else NA,
+        ESTADO = if("stateProvince" %in% names(.)) as.character(stateProvince) else NA,
+        MUNICÍPIO = if("county" %in% names(.)) as.character(county) else NA,
+        COLETOR = if("recordedBy" %in% names(.)) as.character(recordedBy) else NA,
+        DATA_COLETA = paste(year, month, day, sep="-"),
+        DETERMINADOR = if("identifiedBy" %in% names(.)) as.character(identifiedBy) else NA,
+        DATA_DETERMINACAO = if("dateIdentified" %in% names(.)) as.character(dateIdentified) else NA,
+        CATÁLOGO = if("catalogNumber" %in% names(.)) as.character(catalogNumber) else NA,
+        INSTITUIÇÃO = if("institutionCode" %in% names(.)) as.character(institutionCode) else NA,
+        OCCURRENCE_ID = if("occurrenceID" %in% names(.)) as.character(occurrenceID) else NA,
+        FONTE = "speciesLink"
+      ) %>%
+      dplyr::select(ESPÉCIE, FAMÍLIA, GÊNERO, LATITUDE, LONGITUDE, PAÍS, ESTADO, MUNICÍPIO,
+                    COLETOR, DATA_COLETA, DETERMINADOR, DATA_DETERMINACAO, CATÁLOGO,
+                    INSTITUIÇÃO, OCCURRENCE_ID, FONTE)
+
+    message(paste0("   (ok) ", nrow(df_clean), " registros do speciesLink."))
+    return(df_clean)
+  }, error = function(e) {
+    message(paste0("   (X) Erro no speciesLink: ", e$message))
+    return(data.frame())
   })
-  dplyr::bind_rows(results)
 }
