@@ -12,7 +12,7 @@ run_workflow(species, export_path = getwd())
 \item{export_path}{Character. Directory to save outputs.}
 }
 \value{
-A list with two tibbles: [\link{1}] Labeled data, [\link{2}] Clean data.
+A list with two tibbles: [[1]] Labeled data, [[2]] Clean data.
 }
 \description{
 Full biodiversity workflow: GBIF + speciesLink + deduplication
