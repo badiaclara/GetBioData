@@ -43,6 +43,15 @@ total <- bind_biodata(g, s) |>
 
 # Resultado: 16 colunas, registros únicos, pronto para análise!
 
+# Se quiser rodar com mais de uma espécie:
+# Criar a lista com nomes corretos e sem underscore ("_")
+minhas_especies <- c("Araucaria angustifolia", "Cedrela fissilis")
+
+# Rodando o workflow para todas de uma vez
+# O pacote vai criar dois arquivos Excel para cada espécie na lista!
+df <- run_workflow(minhas_especies)
+
+
 📂 Entendendo os Resultados
 
 Para cada espécie, o GetBioData exporta:
@@ -70,3 +79,4 @@ Este projeto está sob a licença MIT.
 
 Divirta-se :)
 Clara Badia
+
