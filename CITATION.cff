@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Badia"
+  given-names: "Clara"
+  orcid: "https://orcid.org/0000-0002-1168-0721" # Substitua pelo seu ORCID real
+title: "GetBioData: Ferramenta para Coleta e Padronização de Dados de Biodiversidade"
+version: v0.1.4
+doi: "10.5281/zenodo.18329581 "
+date-released: 2026-01-21
+url: "https://github.com/badiaclara/GetBioData"
+repository-code: "https://github.com/badiaclara/GetBioData"
+license: MIT
