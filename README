@@ -30,12 +30,18 @@ library(GetBioData)
 # 1. Configure sua chave do speciesLink (opcional)
 Sys.setenv(SPLINK_API_KEY = "sua_chave_aqui")     ----> Importante: o usuário deve cadastrar-se no site do splink e gerar sua chave API, pessoal e intransferível. A análise não vai rodar sem a chave.
 
-# 2. Defina as espécies
-spp <- c("Araucaria angustifolia", "Cedrela fissilis")
+# 2. Coleta e União (As 16 colunas)
+df <- run_workflow("Araucaria angustifolia") 
 
-# 3. Execute o workflow
-# Isso gerará dois arquivos .xlsx para cada espécie na sua pasta de trabalho
-resultados <- run_workflow(species = spp)
+# Se o usuário quiser fazer o passo-a-passo manual:
+g <- get_gbif("Araucaria angustifolia")
+s <- get_splink("Araucaria angustifolia")
+
+total <- bind_biodata(g, s) |> 
+         dedup_label() |> 
+         kill_dedup()
+
+# Resultado: 16 colunas, registros únicos, pronto para análise!
 
 📂 Entendendo os Resultados
 
@@ -61,4 +67,6 @@ Registros	CATÁLOGO, INSTITUIÇÃO, OCCURRENCE_ID, FONTE
 
 Este projeto está sob a licença MIT.
 
+
 Divirta-se :)
+Clara Badia
