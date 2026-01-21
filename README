@@ -1,5 +1,7 @@
 GetBioData 🌿
 
+Badia, C. (2026). GetBioData: Ferramenta para Coleta e Padronização de Dados de Biodiversidade (v0.1.4). Zenodo. https://doi.org/10.5281/zenodo.18329581
+
 GetBioData é um pacote em R desenvolvido para automatizar a captura, padronização e limpeza de dados de ocorrência de espécies a partir das bases GBIF e speciesLink.
 
 O pacote resolve o problema comum de lidar com centenas de colunas desnecessárias e registros duplicados entre diferentes plataformas, entregando um conjunto de dados enxuto e pronto para análise.
@@ -79,4 +81,5 @@ Este projeto está sob a licença MIT.
 
 Divirta-se :)
 Clara Badia
+
 
