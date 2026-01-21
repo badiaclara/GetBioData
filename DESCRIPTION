@@ -1,0 +1,22 @@
+Package: GetBioData
+Title: Download e Limpeza de Dados de Biodiversidade (GBIF e speciesLink)
+Version: 0.1.2
+Authors@R: person("Clara", "Badia", email = "clarabadia.cb@gmail.com", role = c("aut", "cre"))
+Description: Ferramenta para automatizar o download de dados de ocorrência de 
+    espécies das bases GBIF e speciesLink. O pacote unifica os formatos e 
+    aplica um motor de deduplicação hierárquica para remover registros 
+    redundantes, entregando planilhas prontas para análise.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Imports: 
+    dplyr,
+    rgbif,
+    jsonlite,
+    httr,
+    lubridate,
+    writexl,
+    magrittr,
+    utils
+	
